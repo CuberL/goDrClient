@@ -164,20 +164,25 @@ func (cfg *myCfg) getOption(section string, option string, empty bool) string {
 	return result
 }
 
-func (cfg *myCfg) Save() {
+func (cfg *myCfg) save() {
 	cfg.WriteFile("config.ini", os.FileMode(os.O_WRONLY), "goDrClient Config File")
 }
 
 func main() {
 
 	end = make(chan bool)
+	var c *config.Config
 
-	c, err := config.ReadDefault("config.ini")
-	cfg := myCfg{c}
-	if err != nil {
-		fmt.Println("Config File Read Error!")
-		os.Exit(0)
+	_, err = os.Stat("config.ini")
+
+	if err == nil {
+		c, err = config.ReadDefault("config.ini")
+		checkError(err)
+	} else {
+		c = config.NewDefault()
 	}
+	cfg := myCfg{c}
+
 	username = cfg.getOption("user", "username", true)
 	password = cfg.getOption("user", "password", true)
 	if username == "" || password == "" {
@@ -187,7 +192,7 @@ func main() {
 		fmt.Print("Password: ")
 		fmt.Scan(&password)
 		cfg.AddOption("user", "password", password)
-		cfg.Save()
+		cfg.save()
 	}
 
 devSelect:
