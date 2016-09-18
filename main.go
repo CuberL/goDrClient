@@ -164,6 +164,10 @@ func (cfg *myCfg) getOption(section string, option string, empty bool) string {
 	return result
 }
 
+func (cfg *myCfg) Save() {
+	cfg.WriteFile("config.ini", os.FileMode(os.O_WRONLY), "goDrClient Config File")
+}
+
 func main() {
 
 	end = make(chan bool)
@@ -174,8 +178,18 @@ func main() {
 		fmt.Println("Config File Read Error!")
 		os.Exit(0)
 	}
-	username = cfg.getOption("user", "username", false)
-	password = cfg.getOption("user", "password", false)
+	username = cfg.getOption("user", "username", true)
+	password = cfg.getOption("user", "password", true)
+	if username == "" || password == "" {
+		fmt.Print("Username: ")
+		fmt.Scan(&username)
+		cfg.AddOption("user", "username", username)
+		fmt.Print("Password: ")
+		fmt.Scan(&password)
+		cfg.AddOption("user", "password", password)
+		cfg.Save()
+	}
+
 devSelect:
 	dev := cfg.getOption("client", "dev", true)
 	if dev == "" {
@@ -191,7 +205,6 @@ devSelect:
 		}
 		goto devSelect
 	}
-	cfg.WriteFile("config.ini", os.FileMode(os.O_WRONLY), "goDrClient Config File")
 	var tmpInterface *net.Interface
 	switch runtime.GOOS {
 	case "windows":

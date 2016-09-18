@@ -1,9 +1,0 @@
-# goDrClient Config File
-
-[user]
-username: 14115061024
-password: 111111
-
-[client]
-dev: \Device\NPF_{F9FD4A83-F3D2-449F-95DA-D2064C365463}
-
