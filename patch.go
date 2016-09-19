@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/binary"
+
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/layers"
 )
@@ -12,7 +13,6 @@ type myEAPOL struct {
 }
 
 func (e *myEAPOL) SerializeTo(b gopacket.SerializeBuffer, opts gopacket.SerializeOptions) error {
-
 	bytes, _ := b.PrependBytes(4)
 	bytes[0] = e.Version
 	bytes[1] = byte(e.Type)

@@ -2,18 +2,15 @@ package main
 
 import (
 	"fmt"
-	"github.com/google/gopacket"
-	"github.com/google/gopacket/pcap"
-	"github.com/larspensjo/config"
 	"net"
 	"os"
 	"runtime"
 	"time"
-)
 
-type myCfg struct {
-	*config.Config
-}
+	"github.com/google/gopacket"
+	"github.com/google/gopacket/pcap"
+	"github.com/larspensjo/config"
+)
 
 var (
 	clientip [4]byte
@@ -45,41 +42,22 @@ func checkError(err error) {
 	}
 }
 
-func (cfg *myCfg) getOption(section string, option string, empty bool) string {
-	if cfg.HasOption(section, option) == false {
-		if empty {
-			return ""
-		} else {
-			fmt.Printf("Option [%s]%s not Found\n", section, option)
-			os.Exit(0)
-		}
-	}
-	result, err := cfg.String(section, option)
-	checkError(err)
-	return result
-}
-
-func (cfg *myCfg) save() {
-	cfg.WriteFile("config.ini", os.FileMode(os.O_WRONLY), "goDrClient Config File")
-}
-
 func main() {
 
 	end = make(chan bool)
-	var c *config.Config
+	var cfg *config.Config
 
 	_, err = os.Stat("config.ini")
 
 	if err == nil {
-		c, err = config.ReadDefault("config.ini")
+		cfg, err = config.ReadDefault("config.ini")
 		checkError(err)
 	} else {
-		c = config.NewDefault()
+		cfg = config.NewDefault()
 	}
-	cfg := myCfg{c}
 
-	username = cfg.getOption("user", "username", true)
-	password = cfg.getOption("user", "password", true)
+	username, _ = cfg.String("user", "username")
+	password, _ = cfg.String("user", "password")
 	if username == "" || password == "" {
 		fmt.Print("Username: ")
 		fmt.Scan(&username)
@@ -90,13 +68,21 @@ func main() {
 	}
 
 devSelect:
-	dev := cfg.getOption("client", "dev", true)
+	dev, _ := cfg.String("client", "dev")
 	if dev == "" {
 		devs, err := pcap.FindAllDevs()
 		checkError(err)
-		for n, d := range devs {
-			fmt.Printf("[%d] %s\n", n+1, d.Description)
+		switch runtime.GOOS {
+		case "windows":
+			for n, d := range devs {
+				fmt.Printf("[%d] %s\n", n+1, d.Description)
+			}
+		default:
+			for n, d := range devs {
+				fmt.Printf("[%d] %s\n", n+1, d.Name)
+			}
 		}
+
 		s := 0
 		fmt.Scan(&s)
 		if s >= 1 && s <= len(devs) {
@@ -104,7 +90,12 @@ devSelect:
 		}
 		goto devSelect
 	}
-	cfg.save()
+	serverIpStr, _ := cfg.String("server", "ip")
+	if serverIpStr == "" {
+		serverIpStr = "192.168.127.129"
+		cfg.AddOption("server", "ip", serverIpStr)
+	}
+	cfg.WriteFile("config.ini", os.FileMode(os.O_WRONLY), "goDrClient Config File")
 	var tmpInterface *net.Interface
 	switch runtime.GOOS {
 	case "windows":
@@ -115,13 +106,12 @@ devSelect:
 
 	checkError(err)
 	mac = tmpInterface.HardwareAddr
-	//ipStr, _ := tmpInterface.Addrs()
-	//fmt.Sscanf(ipStr[0].String(), "%d.%d.%d.%d", clientip[0], clientip[1], clientip[2], clientip[3])
-	clientip = [4]byte{192, 168, 195, 95}
-	serverip = [4]byte{192, 168, 127, 129}
+	ipStr, _ := tmpInterface.Addrs()
+	fmt.Sscanf(ipStr[0].String(), "%d.%d.%d.%d/%d", &clientip[0], &clientip[1], &clientip[2], &clientip[3])
+	fmt.Sscanf(serverIpStr, "%d.%d.%d.%d", &serverip[0], &serverip[1], &serverip[2], &serverip[3])
 	boardCastAddr = net.HardwareAddr{0xff, 0xff, 0xff, 0xff, 0xff, 0xff}
 
-	handle, err = pcap.OpenLive(dev, 1024, false, 30*time.Second)
+	handle, err = pcap.OpenLive(dev, 1024, false, time.Second)
 	fmt.Println(dev)
 	checkError(err)
 
