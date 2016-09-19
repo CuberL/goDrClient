@@ -120,7 +120,7 @@ devSelect:
 	packetSrc := gopacket.NewPacketSource(handle, handle.LinkType())
 	go readNewPacket(packetSrc)
 
-	udpServerAddr, err := net.ResolveUDPAddr("udp4", "192.168.127.129:61440")
+	udpServerAddr, err := net.ResolveUDPAddr("udp4", serverIpStr+":61440")
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(0)
