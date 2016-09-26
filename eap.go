@@ -7,6 +7,7 @@ import (
 	"github.com/google/gopacket/layers"
 	"net"
 	"os"
+	"time"
 )
 
 /* 发送EAPOL包 */
@@ -15,7 +16,7 @@ func sendEAPOL(Version byte, Type layers.EAPOLType, SrcMAC net.HardwareAddr, Dst
 	options := gopacket.SerializeOptions{}
 	gopacket.SerializeLayers(buffer, options,
 		&layers.Ethernet{EthernetType: layers.EthernetTypeEAPOL, SrcMAC: SrcMAC, DstMAC: DstMAC},
-		&myEAPOL{&layers.EAPOL{Version: 0x01, Type: layers.EAPOLTypeStart}, 0},
+		&myEAPOL{&layers.EAPOL{Version: 0x01, Type: Type}, 0},
 	)
 	//var err error
 	err := handle.WritePacketData(buffer.Bytes())
@@ -66,6 +67,7 @@ func readNewPacket(packetSrc *gopacket.PacketSource) {
 			case 0x04: //Failure
 				fmt.Println("Failed")
 				fmt.Println("Retry...")
+				time.Sleep(5*time.Second)
 				EAPAuth()
 			}
 

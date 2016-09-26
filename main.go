@@ -111,7 +111,7 @@ devSelect:
 	fmt.Sscanf(serverIpStr, "%d.%d.%d.%d", &serverip[0], &serverip[1], &serverip[2], &serverip[3])
 	boardCastAddr = net.HardwareAddr{0xff, 0xff, 0xff, 0xff, 0xff, 0xff}
 
-	handle, err = pcap.OpenLive(dev, 1024, false, time.Second)
+	handle, err = pcap.OpenLive(dev, 1024, false, 0*time.Second)
 	fmt.Println(dev)
 	checkError(err)
 

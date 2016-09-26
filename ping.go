@@ -55,9 +55,9 @@ func sendPingStart() {
 func pingCycle() {
 	time.Sleep(1 * time.Second)
 	for {
-		go sendPing40(1)
+		sendPing40(1)
 		time.Sleep(10 * time.Second)
-		go sendPing38()
+		sendPing38()
 		time.Sleep(5 * time.Second)
 	}
 }
@@ -150,7 +150,7 @@ func recvPing() {
 		if n > 0 {
 			if data[0] == 0x07 { //应答包
 				if data[2] == 0x10 && n == 32 { //第一次应答
-					go sendPingInfo(data[8:12]) //发送用户信息包
+					sendPingInfo(data[8:12]) //发送用户信息包
 				} else if data[2] == 0x30 { //第二次应答
 					UknCode_1 = data[24]
 					UknCode_2 = data[25]
@@ -158,7 +158,7 @@ func recvPing() {
 					go pingCycle() //发送Ping-1
 				} else if data[2] == 0x28 { //Ping应答
 					if data[5] == 0x02 { //收到Ping-2
-						go sendPing40(3) //发送Ping-3
+						sendPing40(3) //发送Ping-3
 					}
 				}
 			}
