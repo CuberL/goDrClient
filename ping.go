@@ -120,7 +120,7 @@ func sendPingInfo(data []byte) {
 	copy(buf[16:20], []byte{0x02, 0x22, 0x00, 0x24})
 	copy(buf[20:24], data)
 	copy(buf[32:], username)
-	hostname := "lzy-pc"
+	hostname := "sgu"
 	copy(otherInfo[0:32], hostname)
 	copy(otherInfo[32:36], []byte{223, 5, 5, 5})
 	copy(otherInfo[40:44], []byte{223, 6, 6, 6})
